@@ -1,0 +1,154 @@
+*, *:before, *:after {
+   box-sizing: inherit; }
+
+html {
+   font-size: 14px;
+   box-sizing: border-box; }
+
+body, button, input, select, textarea {
+   font-family: Lato, sans-serif;
+   font-size: inherit;
+   line-height: 1.4375; }
+
+body {
+   margin: 20px; }
+
+H1 {
+   font-size: 22px; }
+
+a {
+   color: #07C;
+   text-decoration: none; }
+a:hover {
+   text-decoration: underline; }
+
+div.footer {
+   margin-top: 8px;
+   font-size: 12px; }
+
+code,
+.code {
+   font-family: Consolas, monospace; }
+code {
+   background-color: #eff0f1; }
+
+input[type="text"], input[type="number"] {
+   padding: 1px 2px; }
+
+input[type="number"]::-webkit-inner-spin-button {
+   -webkit-appearance: none; }
+input[type="number"] {
+   -moz-appearance: textfield; }
+
+.hidden {
+   display: none !important; }
+
+.parmBlock {
+   display: flex;
+   align-items: center;
+   margin-bottom: 10px; }
+
+.parmBlock label {
+   width: 100px; }
+
+.parmBlock input[type="number"] {
+   width: 60px; }
+
+#components {
+   width: 700px; }
+
+#duration,
+#fadingDuration {
+   margin-right: 25px; }
+
+#fadingDurationLabel,
+#autoPlayLabel {
+   width: 80px; }
+
+div.actionButtons {
+   display: flex;
+   align-items: center;
+   margin-top: 20px; }
+
+div.actionButtons button {
+   width: 70px;
+   padding: 4px 0px;
+   margin-right: 20px; }
+
+.miniPseudoButton {
+   color: #07C;
+   cursor: pointer;
+   font-size: 12px; }
+
+#componentsHelpButton {
+   margin-left: 5px; }
+
+#componentsHelpText {
+   background-color: #FEFAE2;
+   border: 1px solid #F3EED5;
+   padding: 5px;
+   margin-top: 8px;
+   margin-left: 100px;
+   margin-bottom: 8px;
+   width: 550px; }
+
+/*--- Spectrum and curve viewers ---*/
+
+#spectrumViewer,
+#curveViewer {
+   display: block;
+   width: 800px;
+   border: 1px solid #888;
+   outline: none; }
+#spectrumViewer {
+   margin-top: 25px;
+   height: 300px;
+   --grid-color-0: #D4D4D4; }
+#curveViewer {
+   margin-top: 18px;
+   height: 200px; }
+
+div.miniButtonsBelow {
+   margin-top: 5px;
+   display: flex; }
+
+div.miniButtonsBelow div {
+   margin-right: 10px; }
+
+#spectrumViewerRangeParms {
+   display: flex;
+   align-items: center;
+   margin-top: 5px; }
+
+#spectrumViewerRangeParms input {
+   width: 60px; }
+
+#spectrumViewerRangeParms > * {
+   margin-left: 8px; }
+#spectrumViewerRangeParms > *:first-child {
+   margin-left: 0; }
+#spectrumViewerRangeParms .gap {
+   margin-left: 15px; }
+
+#curveViewerHelpText,
+#spectrumViewerHelpText {
+   background-color: #FEFAE2;
+   border: 1px solid #F3EED5;
+   padding: 3px;
+   margin-top: 8px;
+   margin-bottom: 20px;
+   width: 450px; }
+
+table.functionCurveViewerHelp {
+   border-collapse: collapse;
+   width: 100%; }
+
+table.functionCurveViewerHelp td {
+   padding: 3px;
+   vertical-align: top;
+   border-bottom: 1px solid #eee; }
+table.functionCurveViewerHelp tr:last-child td {
+   border-bottom: none; }
+
+.functionCurveViewerHelpCol1 {
+   width: 230px; }

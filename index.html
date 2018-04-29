@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+ <link rel="stylesheet" href="app.css">
+ <script src="app.js"></script>
+ <title>SinSyn - Sinusoidal Synthesizer</title>
+</head>
+<body>
+
+<h1>SinSyn - Sinusoidal Synthesizer</h1>
+
+<div class="parmBlock">
+ <label for="components">Components:</label>
+ <input id="components" type="text" class="code">
+ <span id="componentsHelpButton" class="miniPseudoButton">Help</span>
+</div>
+<div id="componentsHelpText" class="hidden">
+ The components string specifies the sinusoidal components of the sound.<br>
+ Examples:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<code>440 660 880</code><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<code>440/0 660/-10 880/-20</code><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<code>235.5 *3/-2.5 *5/-6 *7/-17 *9/-6 *11/-18.4 *13/-15.4</code><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<code>440/0/0 443/0/0.5</code><br>
+ A component has the format <code>freq</code>, <code>freq</code>/<code>ampl</code> or <code>freq</code>/<code>ampl</code>/<code>phase</code>.<br>
+ <code>freq</code> is an absolute frequency in Hz or a relative frequency in the format <code>*factor</code>.<br>
+ A relative frequency, specified with <code>*</code>, is relative to the last absolute frequency.<br>
+ <code>ampl</code> is a relative amplitude in dB.
+ The overall amplitude is normalized for not exceeding<br> the maximum amplitude range and keeping the power of the sound mostly constant.<br>
+ <code>phase</code> is a number in the range 0 to 1, where 1 corresponds to a phase of 2&pi; in radians.
+</div>
+<div class="parmBlock">
+ <label for="duration">Duration [s]:</label>
+ <input id="duration" type="number" step="any" min="0" max="1000" required class="code">
+ <label id="fadingDurationLabel" for="fadingDuration">Fading [s]:</label>
+ <input id="fadingDuration" type="number" step="any" min="0" required class="code">
+ <label id="autoPlayLabel" for="autoPlay">Auto play:</label>
+ <input id="autoPlay" type="checkbox">
+</div>
+<div class="actionButtons">
+ <button id="playButton">Play</button>
+ <button id="wavFileButton">WAV file</button>
+ <span>Highest common factor [Hz]:&nbsp; <span id="gcd"></span></span>
+</div>
+
+<canvas id="spectrumViewer" tabindex="1">
+</canvas>
+<div class="miniButtonsBelow">
+ <div id="spectrumViewerHelpButton" class="miniPseudoButton">Help</div>
+ <div id="spectrumViewerRangeButton" class="miniPseudoButton">Range</div>
+</div>
+<div id="spectrumViewerHelpText" class="hidden"></div>
+<div id="spectrumViewerRangeParms" class="hidden">
+ <label for="spectrumYMin">Amplitude [dB]:</label>
+ <input id="spectrumYMin" type="number" step="any" class="code">
+ <label>-</label>
+ <input id="spectrumYMax" type="number" step="any" class="code">
+ <label for="spectrumXMin" class="gap">Frequency [Hz]:</label>
+ <input id="spectrumXMin" type="number" step="any" class="code">
+ <label>-</label>
+ <input id="spectrumXMax" type="number" step="any" class="code">
+</div>
+
+<canvas id="curveViewer" tabindex="1">
+</canvas>
+<div class="miniButtonsBelow">
+ <div id="curveViewerHelpButton" class="miniPseudoButton">Help</div>
+</div>
+<div id="curveViewerHelpText" class="hidden"></div>
+
+<div class="footer">
+SinSyn source code: &nbsp;<a href="https://github.com/chdh/sin-syn">Github</a>
+</div>
+
+</body>
+</html>
