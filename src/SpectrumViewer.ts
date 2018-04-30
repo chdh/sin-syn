@@ -101,7 +101,7 @@ class WidgetContext {
          p = 0; }                                          // restart from the beginning of the array
       while (p < n && c[p].frequency < x) {
          p++; }
-      this.componentsPos = p;                              // safe position as start value for next run
+      this.componentsPos = p;                              // save position as start value for next run
       return p; }}
 
 // Rounds up to the next multiple of a decimal unit.

@@ -193,26 +193,8 @@ function createCurveViewerFunction (generator: GeneratorFunction, gParms: Genera
    const maxFrequency = Math.max(...getFrequencies(gParms));
    const curveSamplingFactor = 16;                         // (heuristical value)
    const curveSamplingFrequency = Math.max(1, Math.min(audioContext.sampleRate, maxFrequency * curveSamplingFactor));
-   const curveSamplingInterval = 1 / curveSamplingFrequency;
-   return function (xCenter: number, sampleWidth: number) : (number | number[] | undefined) {
-      if (sampleWidth <= curveSamplingInterval) {
-         return generator(xCenter); }
-      // If the sample width of the function curve viewer is larger than a critical limit,
-      // we return min/max values for the curve graph plot.
-      if (xCenter < 0 || xCenter > gParms.duration) {
-         return undefined; }
-      const n = Math.ceil(sampleWidth / curveSamplingInterval);      // subsampling factor
-      const subSampleWidth = sampleWidth / n;
-      const x0 = xCenter - sampleWidth / 2 + subSampleWidth / 2;
-      const v0 = generator(x0);
-      let vMin = v0;
-      let vMax = v0;
-      for (let i = 1; i < n; i++) {
-         const x = x0 + i * subSampleWidth;
-         const v = generator(x);
-         vMin = Math.min(vMin, v);
-         vMax = Math.max(vMax, v); }
-      return [vMin, vMax]; }}
+   const criticalWidth = 1 / curveSamplingFrequency;
+   return FunctionCurveViewer.createEnvelopeViewerFunction(generator, criticalWidth); }
 
 function setCurveViewer (generator: GeneratorFunction, gParms: GeneratorParms) {
    const defaultXRange = 0.01;                             // 10 ms
