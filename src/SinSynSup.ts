@@ -2,6 +2,22 @@
 
 import {ComponentParms} from "./SinSynGen";
 
+// Parses a components string.
+// Syntax of the components string:
+//    frequency1[/amplitude1[/phase1]] frequency2[/amplitude2[/phase2]] ...
+// Examples:
+//    440 660 880
+//    440/0 660/-10 880/-20
+//    235.5 *3/-2.5 *5/-6 *7/-17 *9/-6 *11/-18.4 *13/-15.4
+//    440/0/0 443/0/0.5
+// A component has one of the following formats:
+//    frequency
+//    frequency/amplitude
+//    frequency/amplitude/phase
+// The frequency is absolute in Hz or a relative in the format "*factor".
+// A relative frequency, specified with "*", is relative to the last absolute frequency.
+// The amplitude is in dB.
+// The phase is a number in the range 0 to 1, where 1 corresponds to a phase of 2 PI in radians.
 export function parseComponentParmsString (s: string) : ComponentParms[] {
    let p = 0;
    let components: ComponentParms[] = Array(0);
