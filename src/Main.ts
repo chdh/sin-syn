@@ -216,8 +216,10 @@ function curveViewerHelpButton_click() {
 
 function encodeUrlParms (uiParms: UiParms) : string {
    const usp = new URLSearchParams();
-   usp.set("components", uiParms.components);
-   usp.set("duration", String(uiParms.duration));
+   if (uiParms.components != defaultUiParms.components) {
+      usp.set("components", uiParms.components); }
+   if (uiParms.duration != defaultUiParms.duration) {
+      usp.set("duration", String(uiParms.duration)); }
    if (uiParms.fadingDuration != defaultUiParms.fadingDuration) {
       usp.set("fadingDuration", String(uiParms.fadingDuration)); }
    if (uiParms.spectrumXMin) {
