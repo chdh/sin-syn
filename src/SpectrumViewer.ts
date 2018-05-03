@@ -18,7 +18,7 @@ interface Style {
 class WidgetContext {
 
    public canvas:            HTMLCanvasElement;            // the DOM canvas element
-   public fcvWidget:         FunctionCurveViewer.Widget;
+   public fcvWidget:         FunctionCurveViewer.Widget;   // the underlying function curve widget
    public components:        Component[];                  // sorted by frequency
    public componentsPos?:    number;                       // previous position in components array, used only for speed optimization
    public style:             Style;

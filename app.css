@@ -61,9 +61,8 @@ input[type="number"] {
 #fadingDuration {
    margin-right: 25px; }
 
-#fadingDurationLabel,
-#autoPlayLabel {
-   width: 80px; }
+#fadingDurationLabel {
+   width: 85px; }
 
 div.actionButtons {
    display: flex;

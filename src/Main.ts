@@ -13,7 +13,6 @@ var audioContext:          AudioContext;
 var componentsElement:     HTMLInputElement;
 var durationElement:       HTMLInputElement;
 var fadingDurationElement: HTMLInputElement;
-var autoPlayElement:       HTMLInputElement;
 var spectrumXMinElement:   HTMLInputElement;
 var spectrumXMaxElement:   HTMLInputElement;
 var spectrumYMinElement:   HTMLInputElement;
@@ -33,7 +32,6 @@ interface UiParms {
    components:     string;
    duration:       number;
    fadingDuration: number;
-   autoPlay:       boolean;
    spectrumXMin?:  number;
    spectrumXMax?:  number;
    spectrumYMin?:  number;
@@ -42,14 +40,12 @@ interface UiParms {
 const defaultUiParms: UiParms = {
    components:     "440",
    duration:       1,
-   fadingDuration: 0.02,
-   autoPlay:       false };
+   fadingDuration: 0.02 };
 
 function setUiParms (uiParms: UiParms) {
    durationElement.valueAsNumber = uiParms.duration;
    fadingDurationElement.valueAsNumber = uiParms.fadingDuration;
    componentsElement.value = uiParms.components;
-   autoPlayElement.checked = uiParms.autoPlay;
    setNumberInputElementValue(spectrumXMinElement, uiParms.spectrumXMin);
    setNumberInputElementValue(spectrumXMaxElement, uiParms.spectrumXMax);
    setNumberInputElementValue(spectrumYMinElement, uiParms.spectrumYMin);
@@ -66,7 +62,6 @@ function getUiParms() : UiParms | undefined {
    uiParms.components = componentsElement.value;
    uiParms.duration = durationElement.valueAsNumber;
    uiParms.fadingDuration = fadingDurationElement.valueAsNumber;
-   uiParms.autoPlay = autoPlayElement.checked;
    uiParms.spectrumXMin = getNumberInputElementValue(spectrumXMinElement);
    uiParms.spectrumXMax = getNumberInputElementValue(spectrumXMaxElement);
    uiParms.spectrumYMin = getNumberInputElementValue(spectrumYMinElement);
@@ -155,6 +150,7 @@ function refreshPlayButton() {
    playButtonElement.textContent = activeAudioSourceNode ? "Stop" : "Play"; }
 
 function playButton_click2() {
+   resumeAudioContext();
    if (isAudioPlaying()) {
       stopAudioPlayer(); }
     else {
@@ -224,8 +220,6 @@ function encodeUrlParms (uiParms: UiParms) : string {
    usp.set("duration", String(uiParms.duration));
    if (uiParms.fadingDuration != defaultUiParms.fadingDuration) {
       usp.set("fadingDuration", String(uiParms.fadingDuration)); }
-   if (uiParms.autoPlay) {
-      usp.set("autoPlay", "1"); }
    if (uiParms.spectrumXMin) {
       usp.set("spectrumXMin", String(uiParms.spectrumXMin)); }
    if (uiParms.spectrumXMax != undefined) {
@@ -246,7 +240,6 @@ function decodeUrlParms (urlParmsString: string) : UiParms {
    uiParms.components     = usp.get("components") || defaultUiParms.components;
    uiParms.duration       = getNumericUrlSearchParam(usp, "duration", defaultUiParms.duration)!;
    uiParms.fadingDuration = getNumericUrlSearchParam(usp, "fadingDuration", defaultUiParms.fadingDuration)!;
-   uiParms.autoPlay       = Boolean(Number(usp.get("autoPlay")));
    uiParms.spectrumXMin   = getNumericUrlSearchParam(usp, "spectrumXMin");
    uiParms.spectrumXMax   = getNumericUrlSearchParam(usp, "spectrumXMax");
    uiParms.spectrumYMin   = getNumericUrlSearchParam(usp, "spectrumYMin");
@@ -262,19 +255,17 @@ function refreshUrl() : boolean {
       window.history.pushState(null, "", "#" + urlParmsString); }
    return true; }
 
-function restoreAppStateFromUrl (autoPlayEnabled: boolean = false) {
+function restoreAppStateFromUrl() {
    stopAudioPlayer();
    const urlParmsString = window.location.hash.substring(1);
    const uiParms = decodeUrlParms(urlParmsString);
    setUiParms(uiParms);
-   if (autoPlayEnabled && uiParms.autoPlay) {
-      playAudio(); }
    refreshSignalInfo();
    refreshPlayButton(); }
 
-function restoreAppStateFromUrl_withErrorHandling (autoPlayEnabled: boolean = false) {
+function restoreAppStateFromUrl_withErrorHandling() {
    try {
-      restoreAppStateFromUrl(autoPlayEnabled); }
+      restoreAppStateFromUrl(); }
     catch (e) {
       alert("Unable to restore application state from URL. " + e);
       console.log(e);
@@ -330,12 +321,15 @@ function refreshAll() : boolean {
       return false; }
    return true; }
 
+function resumeAudioContext() {
+   if (audioContext.state == "suspended") {
+      audioContext.resume(); }}
+
 function startup2() {
    audioContext = new ((<any>window).AudioContext || (<any>window).webkitAudioContext)();
    componentsElement     = <HTMLInputElement>document.getElementById("components")!;
    durationElement       = <HTMLInputElement>document.getElementById("duration")!;
    fadingDurationElement = <HTMLInputElement>document.getElementById("fadingDuration")!;
-   autoPlayElement       = <HTMLInputElement>document.getElementById("autoPlay")!;
    spectrumXMinElement   = <HTMLInputElement>document.getElementById("spectrumXMin")!;
    spectrumXMaxElement   = <HTMLInputElement>document.getElementById("spectrumXMax")!;
    spectrumYMinElement   = <HTMLInputElement>document.getElementById("spectrumYMin")!;
@@ -348,7 +342,6 @@ function startup2() {
    componentsElement.addEventListener("focusout", () => refreshAll());
    durationElement.addEventListener("focusout", () => refreshAll());
    fadingDurationElement.addEventListener("focusout", () => refreshAll());
-   autoPlayElement.addEventListener("focusout", () => refreshAll());
    playButtonElement.addEventListener("click", playButton_click)!;
    document.getElementById("spectrumViewerRangeParms")!.addEventListener("focusout", () => refreshAll());
    document.getElementById("componentsHelpButton")!.addEventListener("click", componentsHelpButton_click);
@@ -361,7 +354,7 @@ function startup2() {
    curveViewerWidget = new FunctionCurveViewer.Widget(curveViewerElement);
    curveViewerWidget.connectedCallback();
    window.onpopstate = () => restoreAppStateFromUrl_withErrorHandling();
-   restoreAppStateFromUrl_withErrorHandling(true); }
+   restoreAppStateFromUrl_withErrorHandling(); }
 
 function startup() {
    try {
