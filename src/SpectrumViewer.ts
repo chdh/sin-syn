@@ -40,10 +40,10 @@ class WidgetContext {
       const vs2 = this.fcvWidget.getViewerState();
       const vs = <ViewerState>{};
       vs.components = this.components.slice();
-      vs.xMin = vs2.planeOrigin.x;
-      vs.xMax = vs2.planeOrigin.x + this.canvas.width / vs2.zoomFactorX;
-      vs.yMin = vs2.planeOrigin.y;
-      vs.yMax = vs2.planeOrigin.y + this.canvas.height / vs2.zoomFactorY;
+      vs.xMin = vs2.xMin;
+      vs.xMax = vs2.xMax;
+      vs.yMin = vs2.yMin;
+      vs.yMax = vs2.yMax;
       return vs; }
 
    public setViewerState (vState: ViewerState) {
@@ -53,14 +53,11 @@ class WidgetContext {
       this.components = components;
       const maxFrequency = (components.length > 0) ? components[components.length - 1].frequency : 10000;
       const maxAmplitude = this.findMaxAmplitude();
-      const xMin = vState.xMin || 0;
-      const xMax = (vState.xMax != undefined) ? vState.xMax : roundUp10(maxFrequency * 1.02);
-      const yMax = (vState.yMax != undefined) ? vState.yMax : Math.ceil((maxAmplitude) / 10) * 10 + 5;
-      const yMin = (vState.yMin != undefined) ? vState.yMin : yMax - this.style.defaultAmplitudeRange;
       vs2.viewerFunction = this.spectrumCurveFunction;
-      vs2.planeOrigin = {x: xMin, y: yMin};
-      vs2.zoomFactorX = this.canvas.width / Math.max(1E-99, xMax - xMin);
-      vs2.zoomFactorY = this.canvas.height / Math.max(1E-99, yMax - yMin);
+      vs2.xMin = vState.xMin || 0;
+      vs2.xMax = (vState.xMax != undefined) ? vState.xMax : Math.max(1E-99, roundUp10(maxFrequency * 1.02));
+      vs2.yMax = (vState.yMax != undefined) ? vState.yMax : Math.ceil((maxAmplitude) / 10) * 10 + 5;
+      vs2.yMin = (vState.yMin != undefined) ? vState.yMin : vs2.yMax - Math.max(1E-99, this.style.defaultAmplitudeRange);
       vs2.gridEnabled = true;
       vs2.xAxisUnit = "Hz";
       vs2.yAxisUnit = "dB";

@@ -167,7 +167,7 @@ function playButton_click() {
 //--- Spectrum viewer ----------------------------------------------------------
 
 function setSpectrumViewer (uiParms: UiParms, gParms: GeneratorParms) {
-   const vState = <SpectrumViewer.ViewerState>{
+   const vState : SpectrumViewer.ViewerState = {
       components: gParms.components,
       xMin:       uiParms.spectrumXMin,
       xMax:       uiParms.spectrumXMax,
@@ -196,11 +196,12 @@ function setCurveViewer (generator: GeneratorFunction, gParms: GeneratorParms) {
    const defaultXRange = 0.01;                             // 10 ms
    const defaultXMin = Math.min(gParms.fadingDuration, gParms.duration / 2 - defaultXRange / 2);
    const oldState = curveViewerWidget.getViewerState();
-   const state = <FunctionCurveViewer.ViewerState>{
+   const state : FunctionCurveViewer.ViewerState = {
       viewerFunction:  createCurveViewerFunction(generator, gParms),
-      planeOrigin:     curveViewerInitDone ? oldState.planeOrigin : {x: defaultXMin, y: -1},
-      zoomFactorX:     curveViewerInitDone ? oldState.zoomFactorX : curveViewerElement.width / defaultXRange,
-      zoomFactorY:     curveViewerInitDone ? oldState.zoomFactorY : curveViewerElement.height / 2,
+      xMin:            curveViewerInitDone ? oldState.xMin : defaultXMin,
+      xMax:            curveViewerInitDone ? oldState.xMax : defaultXMin + defaultXRange,
+      yMin:            curveViewerInitDone ? oldState.yMin : -1,
+      yMax:            curveViewerInitDone ? oldState.yMax : 1,
       gridEnabled:     curveViewerInitDone ? oldState.gridEnabled : true,
       xAxisUnit:       "s",
       primaryZoomMode: FunctionCurveViewer.ZoomMode.x};
