@@ -353,9 +353,7 @@ function startup2() {
    document.getElementById("spectrumViewerRangeButton")!.addEventListener("click", spectrumViewerRangeButton_click);
    document.getElementById("curveViewerHelpButton")!.addEventListener("click", curveViewerHelpButton_click);
    spectrumViewerWidget = new SpectrumViewer.Widget(spectrumViewerElement);
-   spectrumViewerWidget.connectedCallback();
    curveViewerWidget = new FunctionCurveViewer.Widget(curveViewerElement);
-   curveViewerWidget.connectedCallback();
    window.onpopstate = () => restoreAppStateFromUrl_withErrorHandling();
    restoreAppStateFromUrl_withErrorHandling(); }
 

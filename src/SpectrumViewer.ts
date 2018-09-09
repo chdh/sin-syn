@@ -25,9 +25,13 @@ class WidgetContext {
 
    constructor (canvas: HTMLCanvasElement) {
       this.canvas = canvas;
-      this.getStyle();
-      this.fcvWidget = new FunctionCurveViewer.Widget(canvas);
+      this.fcvWidget = new FunctionCurveViewer.Widget(canvas, false);
       this.components = Array(0); }
+
+   public setConnected (connected: boolean) {
+      if (connected) {
+         this.getStyle(); }
+      this.fcvWidget.setConnected(connected); }
 
    private getStyle() {
       const cs = getComputedStyle(this.canvas);
@@ -112,16 +116,14 @@ export class Widget {
 
    private wctx:             WidgetContext;
 
-   constructor (canvas: HTMLCanvasElement) {
-      this.wctx = new WidgetContext(canvas); }
+   constructor (canvas: HTMLCanvasElement, connected = true) {
+      this.wctx = new WidgetContext(canvas);
+      if (connected) {
+         this.setConnected(true); }}
 
-   // Called after the widget has been inserted into the DOM.
-   public connectedCallback() {
-      this.wctx.fcvWidget.connectedCallback(); }
-
-   // Called when the widget is removed from the DOM.
-   public disconnectedCallback() {
-      this.wctx.fcvWidget.disconnectedCallback(); }
+   // Called after the widget is inserted into or removed from the DOM.
+   public setConnected (connected: boolean) {
+      this.wctx.setConnected(connected); }
 
    // Returns the current state of the spectrum viewer.
    public getViewerState() : ViewerState {
