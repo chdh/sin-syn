@@ -24,7 +24,8 @@ export function openSaveAsDialog (blob: Blob, fileName: string) {
    element.download = fileName;
    let clickEvent = new MouseEvent("click");
    element.dispatchEvent(clickEvent);
-   setTimeout(() => URL.revokeObjectURL(url), 60000); }
+   setTimeout(() => URL.revokeObjectURL(url), 60000);
+   (<any>document).dummySaveAsElementHolder = element; }   // to prevent garbage collection
 
 // Returns the greatest common divisor of an array with float numbers.
 export function computeGcd (a: number[]) : number | undefined {
