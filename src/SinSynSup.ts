@@ -20,7 +20,7 @@ import {ComponentParms} from "./SinSynGen";
 // The phase is a number in the range 0 to 1, where 1 corresponds to a phase of 2 PI in radians.
 export function parseComponentParmsString (s: string) : ComponentParms[] {
    let p = 0;
-   let components: ComponentParms[] = Array(0);
+   const components: ComponentParms[] = Array(0);
    let lastAbsoluteFrequency = 1;
    while (true) {
       skipBlanks();

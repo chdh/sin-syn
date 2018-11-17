@@ -52,7 +52,7 @@ class WidgetContext {
 
    public setViewerState (vState: ViewerState) {
       const vs2 = <FunctionCurveViewer.ViewerState>{};
-      let components = vState.components.slice();          // (we only make a shallow copy, caller must not alter deep content)
+      const components = vState.components.slice();        // (we only make a shallow copy, caller must not alter deep content)
       components.sort((a: Component, b: Component) => a.frequency - b.frequency); // sort components by frequency
       this.components = components;
       const maxFrequency = (components.length > 0) ? components[components.length - 1].frequency : 10000;

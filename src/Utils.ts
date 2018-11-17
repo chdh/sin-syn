@@ -18,11 +18,11 @@ export function getNumericUrlSearchParam (usp: URLSearchParams, paramName: strin
    return v; }
 
 export function openSaveAsDialog (blob: Blob, fileName: string) {
-   let url = URL.createObjectURL(blob);
-   let element = document.createElement("a");
+   const url = URL.createObjectURL(blob);
+   const element = document.createElement("a");
    element.href = url;
    element.download = fileName;
-   let clickEvent = new MouseEvent("click");
+   const clickEvent = new MouseEvent("click");
    element.dispatchEvent(clickEvent);
    setTimeout(() => URL.revokeObjectURL(url), 60000);
    (<any>document).dummySaveAsElementHolder = element; }   // to prevent garbage collection

@@ -23,15 +23,15 @@ export function createGeneratorFunction (gParms: GeneratorParms) : GeneratorFunc
    const n = gParms.components.length;
    const fadeInPos = Math.min(gParms.fadingDuration, gParms.duration / 2);
    const fadeOutPos = Math.max(gParms.duration - gParms.fadingDuration, gParms.duration / 2);
-   let amplitudes: number[] = Array(n);                    // linear amplitudes
+   const amplitudes: number[] = Array(n);                  // linear amplitudes
    for (let i = 0; i < n; i++) {
       amplitudes[i] = convertDbToLinear(gParms.components[i].amplitude); }
    normalizeMaxAmplitude(amplitudes, 0.99);
    limitMaxPower(amplitudes, 0.5);
-   let phases: number[] = Array(n);
+   const phases: number[] = Array(n);
    for (let i = 0; i < n; i++) {
       phases[i] = 2 * Math.PI * gParms.components[i].phase; }
-   let omega: number[] = Array(n);
+   const omega: number[] = Array(n);
    for (let i = 0; i < n; i++) {
       omega[i] = 2 * Math.PI * gParms.components[i].frequency; }
    return function (t: number) : number {
@@ -44,7 +44,7 @@ export function createGeneratorFunction (gParms: GeneratorParms) : GeneratorFunc
          a *= fadingFactor(t / gParms.fadingDuration); }
        else if (t > fadeOutPos) {
          a *= fadingFactor((gParms.duration - t) / gParms.fadingDuration); }
-      return a; }}
+      return a; }; }
 
 function convertDbToLinear (dB: number) {
    return Math.pow(10, dB / 20); }

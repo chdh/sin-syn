@@ -5,11 +5,10 @@ import * as SinSynSup from "./SinSynSup";
 import * as SpectrumViewer from "./SpectrumViewer";
 import * as Utils from "./Utils";
 import {setNumberInputElementValue, getNumberInputElementValue, getNumericUrlSearchParam} from "./Utils";
-
+import InternalAudioPlayer from "./InternalAudioPlayer";
 import * as FunctionCurveViewer from "function-curve-viewer";
 import * as WavFileEncoder from "wav-file-encoder";
 
-var audioContext:          AudioContext;
 var componentsElement:     HTMLInputElement;
 var durationElement:       HTMLInputElement;
 var fadingDurationElement: HTMLInputElement;
@@ -24,7 +23,8 @@ var curveViewerElement:    HTMLCanvasElement;
 var curveViewerWidget:     FunctionCurveViewer.Widget;
 var curveViewerInitDone:   boolean = false;
 var gcdElement:            HTMLElement;
-var activeAudioSourceNode: AudioBufferSourceNode | undefined;        // (TODO: change to AudioScheduledSourceNode when defined in TypeScript)
+var audioContext:          AudioContext;
+var audioPlayer:           InternalAudioPlayer;
 
 //--- UI parameters ------------------------------------------------------------
 
@@ -58,7 +58,7 @@ function getUiParms() : UiParms | undefined {
       return; }
    if (!fadingDurationElement.reportValidity()) {
       return; }
-   let uiParms = <UiParms>{};
+   const uiParms = <UiParms>{};
    uiParms.components = componentsElement.value;
    uiParms.duration = durationElement.valueAsNumber;
    uiParms.fadingDuration = fadingDurationElement.valueAsNumber;
@@ -71,7 +71,7 @@ function getUiParms() : UiParms | undefined {
 // When a parameter is invalid, an error message is displayed, the cursor is placed within
 // the affected field and the return value is undefined.
 function getGeneratorParms (uiParms: UiParms) : GeneratorParms | undefined {
-   let gParms = <GeneratorParms>{};
+   const gParms = <GeneratorParms>{};
    gParms.duration = uiParms.duration;
    gParms.fadingDuration = uiParms.fadingDuration;
    try {
@@ -92,34 +92,6 @@ function getFrequencies (gParms: GeneratorParms) : number[] {
 
 //--- Audio player -------------------------------------------------------------
 
-function audioEndedEventHandler() {
-   disposeActiveAudioSource();
-   refreshPlayButton(); }
-
-function isAudioPlaying() : boolean {
-   return !!activeAudioSourceNode; }
-
-function stopAudioPlayer() {
-   disposeActiveAudioSource(); }
-
-function disposeActiveAudioSource() {
-   if (!activeAudioSourceNode) {
-      return; }
-   const sourceNode = activeAudioSourceNode;
-   activeAudioSourceNode = undefined;
-   sourceNode.stop();
-   sourceNode.disconnect();
-   sourceNode.removeEventListener("ended", audioEndedEventHandler); }
-
-function playAudioBuffer (buffer: AudioBuffer) {
-   disposeActiveAudioSource();
-   const sourceNode = audioContext.createBufferSource();
-   sourceNode.buffer = buffer;
-   sourceNode.connect(audioContext.destination);
-   sourceNode.addEventListener("ended", audioEndedEventHandler);
-   sourceNode.start();
-   activeAudioSourceNode = sourceNode; }
-
 function createAudioBuffer (generator: GeneratorFunction, duration: number) : AudioBuffer {
    const sampleRate = audioContext.sampleRate;
    const samples = Math.ceil(duration * sampleRate);
@@ -139,30 +111,27 @@ function createAudioBufferFromUiParms() : AudioBuffer | undefined {
    const generator = createGeneratorFunction(gParms);
    return createAudioBuffer(generator, gParms.duration); }
 
-function playAudio() : boolean {
+async function playAudio() : Promise<boolean> {
    const audioBuffer = createAudioBufferFromUiParms();
    if (!audioBuffer) {
       return false; }
-   playAudioBuffer(audioBuffer);
+   await audioPlayer.playAudioBuffer(audioBuffer);
    return true; }
 
-function refreshPlayButton() {
-   playButtonElement.textContent = activeAudioSourceNode ? "Stop" : "Play"; }
-
-function playButton_click2() {
-   resumeAudioContext();
-   if (isAudioPlaying()) {
-      stopAudioPlayer(); }
+async function playButton_click2() {
+   if (audioPlayer.isPlaying()) {
+      audioPlayer.stop(); }
     else {
-      if (!playAudio()) {
-         return; }}
-   refreshAll(); }
+      await playAudio(); }}
 
-function playButton_click() {
+async function playButton_click() {
    try {
-      playButton_click2(); }
+      await playButton_click2(); }
     catch (e) {
       alert("Error: " + e); }}
+
+function refreshPlayButton() {
+   playButtonElement.textContent = audioPlayer.isPlaying() ? "Stop" : "Play"; }
 
 //--- Spectrum viewer ----------------------------------------------------------
 
@@ -239,7 +208,7 @@ function decodeUrlParms (urlParmsString: string) : UiParms {
    if (!urlParmsString) {
       return defaultUiParms; }
    const usp = new URLSearchParams(urlParmsString);
-   let uiParms = <UiParms>{};
+   const uiParms = <UiParms>{};
    uiParms.components     = usp.get("components") || defaultUiParms.components;
    uiParms.duration       = getNumericUrlSearchParam(usp, "duration", defaultUiParms.duration)!;
    uiParms.fadingDuration = getNumericUrlSearchParam(usp, "fadingDuration", defaultUiParms.fadingDuration)!;
@@ -259,7 +228,7 @@ function refreshUrl() : boolean {
    return true; }
 
 function restoreAppStateFromUrl() {
-   stopAudioPlayer();
+   audioPlayer.stop();
    const urlParmsString = window.location.hash.substring(1);
    const uiParms = decodeUrlParms(urlParmsString);
    setUiParms(uiParms);
@@ -277,7 +246,7 @@ function restoreAppStateFromUrl_withErrorHandling() {
 //--- WAV file output ----------------------------------------------------------
 
 function wavFileButton_click() {
-   stopAudioPlayer();
+   audioPlayer.stop();
    if (!refreshAll()) {
       return; }
    const audioBuffer = createAudioBufferFromUiParms();
@@ -299,7 +268,7 @@ function componentsHelpButton_click() {
    document.getElementById("componentsHelpText")!.classList.toggle("hidden"); }
 
 function resetApplicationState() {
-   stopAudioPlayer();
+   audioPlayer.stop();
    setUiParms(defaultUiParms);
    refreshAll(); }
 
@@ -324,12 +293,10 @@ function refreshAll() : boolean {
       return false; }
    return true; }
 
-function resumeAudioContext() {
-   if (audioContext.state == "suspended") {
-      audioContext.resume(); }}
-
 function startup2() {
    audioContext = new ((<any>window).AudioContext || (<any>window).webkitAudioContext)();
+   audioPlayer = new InternalAudioPlayer(audioContext);
+   audioPlayer.addEventListener("stateChange", refreshPlayButton);
    componentsElement     = <HTMLInputElement>document.getElementById("components")!;
    durationElement       = <HTMLInputElement>document.getElementById("duration")!;
    fadingDurationElement = <HTMLInputElement>document.getElementById("fadingDuration")!;
@@ -342,11 +309,11 @@ function startup2() {
    curveViewerElement    = <HTMLCanvasElement>document.getElementById("curveViewer")!;
    gcdElement            = document.getElementById("gcd")!;
    componentsElement.addEventListener("input", () => componentsElement.setCustomValidity(""));
-   componentsElement.addEventListener("focusout", () => refreshAll());
-   durationElement.addEventListener("focusout", () => refreshAll());
-   fadingDurationElement.addEventListener("focusout", () => refreshAll());
-   playButtonElement.addEventListener("click", playButton_click)!;
-   document.getElementById("spectrumViewerRangeParms")!.addEventListener("focusout", () => refreshAll());
+   componentsElement.addEventListener("focusout", refreshAll);
+   durationElement.addEventListener("focusout", refreshAll);
+   fadingDurationElement.addEventListener("focusout", refreshAll);
+   playButtonElement.addEventListener("click", playButton_click);
+   document.getElementById("spectrumViewerRangeParms")!.addEventListener("focusout", refreshAll);
    document.getElementById("componentsHelpButton")!.addEventListener("click", componentsHelpButton_click);
    document.getElementById("wavFileButton")!.addEventListener("click", wavFileButton_click);
    document.getElementById("spectrumViewerHelpButton")!.addEventListener("click", spectrumViewerHelpButton_click);
