@@ -1,3 +1,5 @@
+import EventTargetPolyfill from "./EventTargetPolyfill";
+
 export default class InternalAudioPlayer {
 
    private audioContext:          AudioContext;
@@ -6,7 +8,7 @@ export default class InternalAudioPlayer {
 
    public constructor (audioContext: AudioContext) {
       this.audioContext = audioContext;
-      this.eventTarget = new EventTarget(); }
+      this.eventTarget = new EventTargetPolyfill(); }
 
    public addEventListener (type: string, listener: EventListener) {
       this.eventTarget.addEventListener(type, listener); }

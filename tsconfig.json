@@ -1,7 +1,7 @@
 {
    "compilerOptions": {
       "alwaysStrict": true,
-      "lib": ["ES6", "DOM"],
+      "lib": ["ES2016", "DOM"],
       "module": "ES6",
       "moduleResolution": "node",
       "noFallthroughCasesInSwitch": true,
@@ -14,7 +14,7 @@
       "removeComments": true,
       "strictFunctionTypes": true,
       "strictNullChecks": true,
-      "target": "ES6"
+      "target": "ES2016"
    },
    "include": [
       "src/**/*"
