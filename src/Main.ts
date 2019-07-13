@@ -40,7 +40,7 @@ interface UiParms {
 const defaultUiParms: UiParms = {
    components:     "440",
    duration:       1,
-   fadingDuration: 0.02 };
+   fadingDuration: 0.05 };
 
 function setUiParms (uiParms: UiParms) {
    durationElement.valueAsNumber = uiParms.duration;

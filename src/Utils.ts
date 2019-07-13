@@ -39,11 +39,17 @@ export function computeGcd (a: number[]) : number | undefined {
          return; }}
    return x; }
 
-function computeGcd2 (a: number, b: number) : number | undefined {
+function computeGcd2 (v1: number, v2: number) : number | undefined {
    const eps1 = 1E-4;
    const eps2 = 1E-7;
-   if (a < b) {
-      const temp = a; a = b; b = temp; }
+   let a: number;
+   let b: number;
+   if (v1 > v2) {
+      a = v1;
+      b = v2; }
+    else {
+      a = v2;
+      b = v1; }
    while (true) {
       if (b < eps1) {
          return; }

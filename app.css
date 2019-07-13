@@ -33,12 +33,18 @@ code {
    background-color: #eff0f1; }
 
 input[type="text"], input[type="number"] {
-   padding: 1px 2px; }
+   padding: 2px 3px;
+   border: 1px solid #aaa; }
 
 input[type="number"]::-webkit-inner-spin-button {
    -webkit-appearance: none; }
 input[type="number"] {
    -moz-appearance: textfield; }
+
+input[type="text"]:focus, input[type="number"]:focus, select:focus, canvas:focus {
+   border-color: #7a9cd3 !important;
+   outline: 1px solid #a6c8ff;
+   outline-offset: 0px; }
 
 .hidden {
    display: none !important; }
@@ -97,8 +103,7 @@ div.actionButtons button {
 #curveViewer {
    display: block;
    width: 800px;
-   border: 1px solid #888;
-   outline: none; }
+   border: 1px solid #aaa; }
 #spectrumViewer {
    margin-top: 25px;
    height: 300px;
