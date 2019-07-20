@@ -12,6 +12,7 @@ import * as WavFileEncoder from "wav-file-encoder";
 var componentsElement:     HTMLInputElement;
 var durationElement:       HTMLInputElement;
 var fadingDurationElement: HTMLInputElement;
+var referenceElement:      HTMLInputElement;
 var spectrumXMinElement:   HTMLInputElement;
 var spectrumXMaxElement:   HTMLInputElement;
 var spectrumYMinElement:   HTMLInputElement;
@@ -32,6 +33,7 @@ interface UiParms {
    components:     string;
    duration:       number;
    fadingDuration: number;
+   reference:      string;
    spectrumXMin?:  number;
    spectrumXMax?:  number;
    spectrumYMin?:  number;
@@ -40,11 +42,13 @@ interface UiParms {
 const defaultUiParms: UiParms = {
    components:     "440",
    duration:       1,
-   fadingDuration: 0.05 };
+   fadingDuration: 0.05,
+   reference:      "" };
 
 function setUiParms (uiParms: UiParms) {
    durationElement.valueAsNumber = uiParms.duration;
    fadingDurationElement.valueAsNumber = uiParms.fadingDuration;
+   referenceElement.value = uiParms.reference;
    componentsElement.value = uiParms.components;
    setNumberInputElementValue(spectrumXMinElement, uiParms.spectrumXMin);
    setNumberInputElementValue(spectrumXMaxElement, uiParms.spectrumXMax);
@@ -62,6 +66,7 @@ function getUiParms() : UiParms | undefined {
    uiParms.components = componentsElement.value;
    uiParms.duration = durationElement.valueAsNumber;
    uiParms.fadingDuration = fadingDurationElement.valueAsNumber;
+   uiParms.reference = referenceElement.value;
    uiParms.spectrumXMin = getNumberInputElementValue(spectrumXMinElement);
    uiParms.spectrumXMax = getNumberInputElementValue(spectrumXMaxElement);
    uiParms.spectrumYMin = getNumberInputElementValue(spectrumYMinElement);
@@ -137,11 +142,12 @@ function refreshPlayButton() {
 
 function setSpectrumViewer (uiParms: UiParms, gParms: GeneratorParms) {
    const vState : SpectrumViewer.ViewerState = {
-      components: gParms.components,
-      xMin:       uiParms.spectrumXMin,
-      xMax:       uiParms.spectrumXMax,
-      yMin:       uiParms.spectrumYMin,
-      yMax:       uiParms.spectrumYMax };
+      components:  gParms.components,
+      xMin:        uiParms.spectrumXMin,
+      xMax:        uiParms.spectrumXMax,
+      yMin:        uiParms.spectrumYMin,
+      yMax:        uiParms.spectrumYMax,
+      focusShield: true };
    spectrumViewerWidget.setViewerState(vState); }
 
 function spectrumViewerHelpButton_click() {
@@ -173,7 +179,8 @@ function setCurveViewer (generator: GeneratorFunction, gParms: GeneratorParms) {
       yMax:            curveViewerInitDone ? oldState.yMax : 1,
       gridEnabled:     curveViewerInitDone ? oldState.gridEnabled : true,
       xAxisUnit:       "s",
-      primaryZoomMode: FunctionCurveViewer.ZoomMode.x};
+      primaryZoomMode: FunctionCurveViewer.ZoomMode.x,
+      focusShield:     true };
    curveViewerWidget.setViewerState(state);
    curveViewerInitDone = true; }
 
@@ -192,6 +199,8 @@ function encodeUrlParms (uiParms: UiParms) : string {
       usp.set("duration", String(uiParms.duration)); }
    if (uiParms.fadingDuration != defaultUiParms.fadingDuration) {
       usp.set("fadingDuration", String(uiParms.fadingDuration)); }
+   if (uiParms.reference) {
+      usp.set("ref", uiParms.reference); }
    if (uiParms.spectrumXMin) {
       usp.set("spectrumXMin", String(uiParms.spectrumXMin)); }
    if (uiParms.spectrumXMax != undefined) {
@@ -212,6 +221,7 @@ function decodeUrlParms (urlParmsString: string) : UiParms {
    uiParms.components     = usp.get("components") || defaultUiParms.components;
    uiParms.duration       = getNumericUrlSearchParam(usp, "duration", defaultUiParms.duration)!;
    uiParms.fadingDuration = getNumericUrlSearchParam(usp, "fadingDuration", defaultUiParms.fadingDuration)!;
+   uiParms.reference      = usp.get("ref") || "";
    uiParms.spectrumXMin   = getNumericUrlSearchParam(usp, "spectrumXMin");
    uiParms.spectrumXMax   = getNumericUrlSearchParam(usp, "spectrumXMax");
    uiParms.spectrumYMin   = getNumericUrlSearchParam(usp, "spectrumYMin");
@@ -254,7 +264,9 @@ function wavFileButton_click() {
       return; }
    const wavFileData = WavFileEncoder.encodeWavFile(audioBuffer, WavFileEncoder.WavFileType.float32);
    const blob = new Blob([wavFileData], {type: "audio/wav"});
-   Utils.openSaveAsDialog(blob, "SinSyn.wav"); }
+   const reference = referenceElement.value;
+   const fileName = "SinSyn" + (reference ? "-" + reference : "") + ".wav";
+   Utils.openSaveAsDialog(blob, fileName); }
 
 //------------------------------------------------------------------------------
 
@@ -300,6 +312,7 @@ function startup2() {
    componentsElement     = <HTMLInputElement>document.getElementById("components")!;
    durationElement       = <HTMLInputElement>document.getElementById("duration")!;
    fadingDurationElement = <HTMLInputElement>document.getElementById("fadingDuration")!;
+   referenceElement      = <HTMLInputElement>document.getElementById("reference")!;
    spectrumXMinElement   = <HTMLInputElement>document.getElementById("spectrumXMin")!;
    spectrumXMaxElement   = <HTMLInputElement>document.getElementById("spectrumXMax")!;
    spectrumYMinElement   = <HTMLInputElement>document.getElementById("spectrumYMin")!;
@@ -312,6 +325,7 @@ function startup2() {
    componentsElement.addEventListener("focusout", refreshAll);
    durationElement.addEventListener("focusout", refreshAll);
    fadingDurationElement.addEventListener("focusout", refreshAll);
+   referenceElement.addEventListener("focusout", refreshAll);
    playButtonElement.addEventListener("click", playButton_click);
    document.getElementById("spectrumViewerRangeParms")!.addEventListener("focusout", refreshAll);
    document.getElementById("componentsHelpButton")!.addEventListener("click", componentsHelpButton_click);

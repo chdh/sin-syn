@@ -9,7 +9,8 @@ export interface ViewerState {
    xMin?:                    number;                       // minimum X value
    xMax?:                    number;                       // maximum X value
    yMin?:                    number;                       // minimum Y value
-   yMax?:                    number; }                     // maximum Y value
+   yMax?:                    number;                       // maximum Y value
+   focusShield?:             boolean; }                    // true to ignore mouse wheel events without focus
 
 interface Style {
    componentLineWidth:       number;                       // width of component lines in pixels
@@ -48,6 +49,7 @@ class WidgetContext {
       vs.xMax = vs2.xMax;
       vs.yMin = vs2.yMin;
       vs.yMax = vs2.yMax;
+      vs.focusShield = vs2.focusShield;
       return vs; }
 
    public setViewerState (vState: ViewerState) {
@@ -66,6 +68,7 @@ class WidgetContext {
       vs2.xAxisUnit = "Hz";
       vs2.yAxisUnit = "dB";
       vs2.primaryZoomMode = FunctionCurveViewer.ZoomMode.x;
+      vs2.focusShield = vState.focusShield;
       this.fcvWidget.setViewerState(vs2); }
 
    private findMaxAmplitude() : number {

@@ -15,7 +15,7 @@
       "removeComments": true,
       "strictFunctionTypes": true,
       "strictNullChecks": true,
-      "target": "ES2016"
+      "target": "ES2017"
    },
    "include": [
       "src/**/*"
