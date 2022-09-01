@@ -24,7 +24,7 @@ class WidgetContext {
    public componentsPos?:    number;                       // previous position in components array, used only for speed optimization
    public style:             Style;
 
-   constructor (canvas: HTMLCanvasElement) {
+   public constructor (canvas: HTMLCanvasElement) {
       this.canvas = canvas;
       this.fcvWidget = new FunctionCurveViewer.Widget(canvas, false);
       this.components = Array(0); }
@@ -52,15 +52,15 @@ class WidgetContext {
       vs.focusShield = vs2.focusShield;
       return vs; }
 
-   public setViewerState (vState: ViewerState) {
-      const vs2 = <FunctionCurveViewer.ViewerState>{};
-      const components = vState.components.slice();        // (we only make a shallow copy, caller must not alter deep content)
+   public setViewerState (vState: Partial<ViewerState>) {
+      const vs2 = <Partial<FunctionCurveViewer.ViewerState>>{};
+      const components = vState.components!.slice();       // (we only make a shallow copy, caller must not alter deep content)
       components.sort((a: Component, b: Component) => a.frequency - b.frequency); // sort components by frequency
       this.components = components;
       const maxFrequency = (components.length > 0) ? components[components.length - 1].frequency : 10000;
       const maxAmplitude = this.findMaxAmplitude();
       vs2.viewerFunction = this.spectrumCurveFunction;
-      vs2.xMin = vState.xMin || 0;
+      vs2.xMin = vState.xMin ?? 0;
       vs2.xMax = (vState.xMax != undefined) ? vState.xMax : Math.max(1E-99, roundUp10(maxFrequency * 1.02));
       vs2.yMax = (vState.yMax != undefined) ? vState.yMax : Math.ceil((maxAmplitude) / 10) * 10 + 5;
       vs2.yMin = (vState.yMin != undefined) ? vState.yMin : vs2.yMax - Math.max(1E-99, this.style.defaultAmplitudeRange);
@@ -100,7 +100,7 @@ class WidgetContext {
       const c = this.components;
       const n = c.length;
       // Speed optimization using this.componentsPos is done with the assumption that the x values normally increase.
-      let p = this.componentsPos || 0;                     // result position of the previous run
+      let p = this.componentsPos ?? 0;                     // result position of the previous run
       if (p > n || p > 0 && c[p - 1].frequency >= x) {     // if out of sync with current components array
          p = 0; }                                          // restart from the beginning of the array
       while (p < n && c[p].frequency < x) {
@@ -119,7 +119,7 @@ export class Widget {
 
    private wctx:             WidgetContext;
 
-   constructor (canvas: HTMLCanvasElement, connected = true) {
+   public constructor (canvas: HTMLCanvasElement, connected = true) {
       this.wctx = new WidgetContext(canvas);
       if (connected) {
          this.setConnected(true); }}
@@ -133,7 +133,7 @@ export class Widget {
       return this.wctx.getViewerState(); }
 
    // Updates the current state of the spectrum viewer.
-   public setViewerState (vState: ViewerState) {
+   public setViewerState (vState: Partial<ViewerState>) {
       this.wctx.setViewerState(vState); }
 
    // Returns the help text as an array.

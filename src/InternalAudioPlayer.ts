@@ -1,17 +1,13 @@
-import EventTargetPolyfill from "./EventTargetPolyfill";
+import {nextTick} from "./Utils.js";
 
-export default class InternalAudioPlayer {
+export default class InternalAudioPlayer extends EventTarget {
 
-   private audioContext:          AudioContext;
-   private activeAudioSourceNode: AudioBufferSourceNode | undefined;   // (TODO: change to AudioScheduledSourceNode when defined in TypeScript)
-   private eventTarget:           EventTarget;
+   private audioContext:           AudioContext;
+   private activeAudioSourceNode?: AudioScheduledSourceNode;
 
    public constructor (audioContext: AudioContext) {
-      this.audioContext = audioContext;
-      this.eventTarget = new EventTargetPolyfill(); }
-
-   public addEventListener (type: string, listener: EventListener) {
-      this.eventTarget.addEventListener(type, listener); }
+      super();
+      this.audioContext = audioContext; }
 
    public async playAudioBuffer (buffer: AudioBuffer) {
       this.disposeActiveAudioSource();
@@ -31,7 +27,7 @@ export default class InternalAudioPlayer {
       this.disposeActiveAudioSource(); }
 
    private audioEndedEventHandler = () => {
-      this.disposeActiveAudioSource(); }
+      this.disposeActiveAudioSource(); };
 
    private disposeActiveAudioSource() {
       if (!this.activeAudioSourceNode) {
@@ -49,6 +45,7 @@ export default class InternalAudioPlayer {
 
    private fireEvent (type: string) {
       const event = new CustomEvent(type);
-      this.eventTarget.dispatchEvent(event); }
+      nextTick(() => {                                     // call event listeners asynchronously
+         this.dispatchEvent(event); }); }
 
    }

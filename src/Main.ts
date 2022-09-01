@@ -4,7 +4,7 @@ import {GeneratorParms, createGeneratorFunction, GeneratorFunction} from "./SinS
 import * as SinSynSup from "./SinSynSup";
 import * as SpectrumViewer from "./SpectrumViewer";
 import * as Utils from "./Utils";
-import {setNumberInputElementValue, getNumberInputElementValue, getNumericUrlSearchParam} from "./Utils";
+import {setNumberInputElementValue, getNumberInputElementValue, getNumericUrlSearchParam, catchError} from "./Utils";
 import InternalAudioPlayer from "./InternalAudioPlayer";
 import * as FunctionCurveViewer from "function-curve-viewer";
 import * as WavFileEncoder from "wav-file-encoder";
@@ -141,7 +141,7 @@ function refreshPlayButton() {
 //--- Spectrum viewer ----------------------------------------------------------
 
 function setSpectrumViewer (uiParms: UiParms, gParms: GeneratorParms) {
-   const vState : SpectrumViewer.ViewerState = {
+   const vState: Partial<SpectrumViewer.ViewerState> = {
       components:  gParms.components,
       xMin:        uiParms.spectrumXMin,
       xMax:        uiParms.spectrumXMax,
@@ -171,7 +171,7 @@ function setCurveViewer (generator: GeneratorFunction, gParms: GeneratorParms) {
    const defaultXRange = 0.01;                             // 10 ms
    const defaultXMin = Math.min(gParms.fadingDuration, gParms.duration / 2 - defaultXRange / 2);
    const oldState = curveViewerWidget.getViewerState();
-   const state : FunctionCurveViewer.ViewerState = {
+   const state: Partial<FunctionCurveViewer.ViewerState> = {
       viewerFunction:  createCurveViewerFunction(generator, gParms),
       xMin:            curveViewerInitDone ? oldState.xMin : defaultXMin,
       xMax:            curveViewerInitDone ? oldState.xMax : defaultXMin + defaultXRange,
@@ -218,10 +218,10 @@ function decodeUrlParms (urlParmsString: string) : UiParms {
       return defaultUiParms; }
    const usp = new URLSearchParams(urlParmsString);
    const uiParms = <UiParms>{};
-   uiParms.components     = usp.get("components") || defaultUiParms.components;
+   uiParms.components     = usp.get("components") ?? defaultUiParms.components;
    uiParms.duration       = getNumericUrlSearchParam(usp, "duration", defaultUiParms.duration)!;
    uiParms.fadingDuration = getNumericUrlSearchParam(usp, "fadingDuration", defaultUiParms.fadingDuration)!;
-   uiParms.reference      = usp.get("ref") || "";
+   uiParms.reference      = usp.get("ref") ?? "";
    uiParms.spectrumXMin   = getNumericUrlSearchParam(usp, "spectrumXMin");
    uiParms.spectrumXMax   = getNumericUrlSearchParam(usp, "spectrumXMax");
    uiParms.spectrumYMin   = getNumericUrlSearchParam(usp, "spectrumYMin");
@@ -263,10 +263,9 @@ function wavFileButton_click() {
    if (!audioBuffer) {
       return; }
    const wavFileData = WavFileEncoder.encodeWavFile(audioBuffer, WavFileEncoder.WavFileType.float32);
-   const blob = new Blob([wavFileData], {type: "audio/wav"});
    const reference = referenceElement.value;
    const fileName = "SinSyn" + (reference ? "-" + reference : "") + ".wav";
-   Utils.openSaveAsDialog(blob, fileName); }
+   Utils.openSaveAsDialog(wavFileData, fileName, "audio/wav", "wav", "WAV audio file"); }
 
 //------------------------------------------------------------------------------
 
@@ -306,9 +305,9 @@ function refreshAll() : boolean {
    return true; }
 
 function startup2() {
-   audioContext = new ((<any>window).AudioContext || (<any>window).webkitAudioContext)();
+   audioContext = new AudioContext();
    audioPlayer = new InternalAudioPlayer(audioContext);
-   audioPlayer.addEventListener("stateChange", refreshPlayButton);
+   audioPlayer.addEventListener("stateChange", () => catchError(refreshPlayButton));
    componentsElement     = <HTMLInputElement>document.getElementById("components")!;
    durationElement       = <HTMLInputElement>document.getElementById("duration")!;
    fadingDurationElement = <HTMLInputElement>document.getElementById("fadingDuration")!;
@@ -322,17 +321,17 @@ function startup2() {
    curveViewerElement    = <HTMLCanvasElement>document.getElementById("curveViewer")!;
    gcdElement            = document.getElementById("gcd")!;
    componentsElement.addEventListener("input", () => componentsElement.setCustomValidity(""));
-   componentsElement.addEventListener("focusout", refreshAll);
-   durationElement.addEventListener("focusout", refreshAll);
-   fadingDurationElement.addEventListener("focusout", refreshAll);
-   referenceElement.addEventListener("focusout", refreshAll);
-   playButtonElement.addEventListener("click", playButton_click);
-   document.getElementById("spectrumViewerRangeParms")!.addEventListener("focusout", refreshAll);
-   document.getElementById("componentsHelpButton")!.addEventListener("click", componentsHelpButton_click);
-   document.getElementById("wavFileButton")!.addEventListener("click", wavFileButton_click);
-   document.getElementById("spectrumViewerHelpButton")!.addEventListener("click", spectrumViewerHelpButton_click);
-   document.getElementById("spectrumViewerRangeButton")!.addEventListener("click", spectrumViewerRangeButton_click);
-   document.getElementById("curveViewerHelpButton")!.addEventListener("click", curveViewerHelpButton_click);
+   componentsElement.addEventListener("focusout", () => catchError(refreshAll));
+   durationElement.addEventListener("focusout", () => catchError(refreshAll));
+   fadingDurationElement.addEventListener("focusout", () => catchError(refreshAll));
+   referenceElement.addEventListener("focusout", () => catchError(refreshAll));
+   playButtonElement.addEventListener("click", () => catchError(playButton_click));
+   document.getElementById("spectrumViewerRangeParms")!.addEventListener("focusout", () => catchError(refreshAll));
+   document.getElementById("componentsHelpButton")!.addEventListener("click", () => catchError(componentsHelpButton_click));
+   document.getElementById("wavFileButton")!.addEventListener("click", () => catchError(wavFileButton_click));
+   document.getElementById("spectrumViewerHelpButton")!.addEventListener("click", () => catchError(spectrumViewerHelpButton_click));
+   document.getElementById("spectrumViewerRangeButton")!.addEventListener("click", () => catchError(spectrumViewerRangeButton_click));
+   document.getElementById("curveViewerHelpButton")!.addEventListener("click", () => catchError(curveViewerHelpButton_click));
    spectrumViewerWidget = new SpectrumViewer.Widget(spectrumViewerElement);
    curveViewerWidget = new FunctionCurveViewer.Widget(curveViewerElement);
    window.onpopstate = () => restoreAppStateFromUrl_withErrorHandling();
@@ -342,11 +341,7 @@ function startup() {
    try {
       startup2(); }
     catch (e) {
+       console.log(e);
       alert("Error: " + e); }}
 
 document.addEventListener("DOMContentLoaded", startup);
-
-// Missing declaration for TypeScript 2.8:
-declare global {
-   interface HTMLInputElement {
-      reportValidity(): boolean; }}

@@ -111,7 +111,8 @@ div.actionButtons button {
 #curveViewer {
    display: block;
    width: 800px;
-   border: 1px solid #aaa; }
+   border: 1px solid #aaa;
+   touch-action: none; }
 #spectrumViewer {
    margin-top: 25px;
    height: 300px;
