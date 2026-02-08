@@ -1,22 +1,20 @@
 // SinSyn web application
 
-import {GeneratorParms, createGeneratorFunction, GeneratorFunction} from "./SinSynGen";
-import * as SinSynSup from "./SinSynSup";
-import * as SpectrumViewer from "./SpectrumViewer";
-import * as Utils from "./Utils";
-import {setNumberInputElementValue, getNumberInputElementValue, getNumericUrlSearchParam, catchError} from "./Utils";
-import InternalAudioPlayer from "./InternalAudioPlayer";
 import * as FunctionCurveViewer from "function-curve-viewer";
 import * as WavFileEncoder from "wav-file-encoder";
+
+import {GeneratorParms, createGeneratorFunction, GeneratorFunction} from "./SinSynGen.ts";
+import * as SinSynSup from "./SinSynSup.ts";
+import * as SpectrumViewer from "./SpectrumViewer.ts";
+import * as Utils from "./Utils.ts";
+import {getNumericUrlSearchParam, catchError} from "./Utils.ts";
+import * as DomUtils from "./DomUtils.ts";
+import InternalAudioPlayer from "./InternalAudioPlayer.ts";
 
 var componentsElement:     HTMLInputElement;
 var durationElement:       HTMLInputElement;
 var fadingDurationElement: HTMLInputElement;
 var referenceElement:      HTMLInputElement;
-var spectrumXMinElement:   HTMLInputElement;
-var spectrumXMaxElement:   HTMLInputElement;
-var spectrumYMinElement:   HTMLInputElement;
-var spectrumYMaxElement:   HTMLInputElement;
 var playButtonElement:     HTMLButtonElement;
 var spectrumViewerElement: HTMLCanvasElement;
 var spectrumViewerWidget:  SpectrumViewer.Widget;
@@ -50,10 +48,10 @@ function setUiParms (uiParms: UiParms) {
    fadingDurationElement.valueAsNumber = uiParms.fadingDuration;
    referenceElement.value = uiParms.reference;
    componentsElement.value = uiParms.components;
-   setNumberInputElementValue(spectrumXMinElement, uiParms.spectrumXMin);
-   setNumberInputElementValue(spectrumXMaxElement, uiParms.spectrumXMax);
-   setNumberInputElementValue(spectrumYMinElement, uiParms.spectrumYMin);
-   setNumberInputElementValue(spectrumYMaxElement, uiParms.spectrumYMax); }
+   DomUtils.setValueNum("spectrumXMin", uiParms.spectrumXMin);
+   DomUtils.setValueNum("spectrumXMax", uiParms.spectrumXMax);
+   DomUtils.setValueNum("spectrumYMin", uiParms.spectrumYMin);
+   DomUtils.setValueNum("spectrumYMax", uiParms.spectrumYMax); }
 
 // When a parameter is invalid, an error message is displayed, the cursor is placed within
 // the affected field and the return value is undefined.
@@ -67,10 +65,10 @@ function getUiParms() : UiParms | undefined {
    uiParms.duration = durationElement.valueAsNumber;
    uiParms.fadingDuration = fadingDurationElement.valueAsNumber;
    uiParms.reference = referenceElement.value;
-   uiParms.spectrumXMin = getNumberInputElementValue(spectrumXMinElement);
-   uiParms.spectrumXMax = getNumberInputElementValue(spectrumXMaxElement);
-   uiParms.spectrumYMin = getNumberInputElementValue(spectrumYMinElement);
-   uiParms.spectrumYMax = getNumberInputElementValue(spectrumYMaxElement);
+   uiParms.spectrumXMin = DomUtils.getValueNumOpt("spectrumXMin");
+   uiParms.spectrumXMax = DomUtils.getValueNumOpt("spectrumXMax");
+   uiParms.spectrumYMin = DomUtils.getValueNumOpt("spectrumYMin");
+   uiParms.spectrumYMax = DomUtils.getValueNumOpt("spectrumYMax");
    return uiParms; }
 
 // When a parameter is invalid, an error message is displayed, the cursor is placed within
@@ -82,7 +80,7 @@ function getGeneratorParms (uiParms: UiParms) : GeneratorParms | undefined {
    try {
       gParms.components = SinSynSup.parseComponentParmsString(uiParms.components); }
     catch (e) {
-      const msg = e.message || e.toString();
+      const msg = e.message ?? e.toString();
       componentsElement.setCustomValidity(msg);
       componentsElement.reportValidity();
       return; }
@@ -312,26 +310,23 @@ function startup2() {
    durationElement       = <HTMLInputElement>document.getElementById("duration")!;
    fadingDurationElement = <HTMLInputElement>document.getElementById("fadingDuration")!;
    referenceElement      = <HTMLInputElement>document.getElementById("reference")!;
-   spectrumXMinElement   = <HTMLInputElement>document.getElementById("spectrumXMin")!;
-   spectrumXMaxElement   = <HTMLInputElement>document.getElementById("spectrumXMax")!;
-   spectrumYMinElement   = <HTMLInputElement>document.getElementById("spectrumYMin")!;
-   spectrumYMaxElement   = <HTMLInputElement>document.getElementById("spectrumYMax")!;
    playButtonElement     = <HTMLButtonElement>document.getElementById("playButton")!;
    spectrumViewerElement = <HTMLCanvasElement>document.getElementById("spectrumViewer")!;
    curveViewerElement    = <HTMLCanvasElement>document.getElementById("curveViewer")!;
    gcdElement            = document.getElementById("gcd")!;
-   componentsElement.addEventListener("input", () => componentsElement.setCustomValidity(""));
-   componentsElement.addEventListener("focusout", () => catchError(refreshAll));
-   durationElement.addEventListener("focusout", () => catchError(refreshAll));
-   fadingDurationElement.addEventListener("focusout", () => catchError(refreshAll));
-   referenceElement.addEventListener("focusout", () => catchError(refreshAll));
-   playButtonElement.addEventListener("click", () => catchError(playButton_click));
-   document.getElementById("spectrumViewerRangeParms")!.addEventListener("focusout", () => catchError(refreshAll));
-   document.getElementById("componentsHelpButton")!.addEventListener("click", () => catchError(componentsHelpButton_click));
-   document.getElementById("wavFileButton")!.addEventListener("click", () => catchError(wavFileButton_click));
-   document.getElementById("spectrumViewerHelpButton")!.addEventListener("click", () => catchError(spectrumViewerHelpButton_click));
-   document.getElementById("spectrumViewerRangeButton")!.addEventListener("click", () => catchError(spectrumViewerRangeButton_click));
-   document.getElementById("curveViewerHelpButton")!.addEventListener("click", () => catchError(curveViewerHelpButton_click));
+   DomUtils.addEventListener("components", "input", () => componentsElement.setCustomValidity(""));
+   DomUtils.addEventListener("components", "focusout", refreshAll);
+   DomUtils.addEventListener("duration", "focusout", refreshAll);
+   DomUtils.addEventListener("fadingDuration", "focusout", refreshAll);
+   DomUtils.addEventListener("reference", "focusout", refreshAll);
+   DomUtils.addClickEventListener("playButton", playButton_click);
+   DomUtils.addEventListener("spectrumViewerRangeParms", "focusout", refreshAll);
+   DomUtils.addClickEventListener("componentsHelpButton", componentsHelpButton_click);
+   DomUtils.addClickEventListener("wavFileButton", wavFileButton_click);
+   DomUtils.addClickEventListener("spectrumViewerHelpButton", spectrumViewerHelpButton_click);
+   DomUtils.addClickEventListener("spectrumViewerRangeButton", spectrumViewerRangeButton_click);
+   DomUtils.addClickEventListener("curveViewerHelpButton", curveViewerHelpButton_click);
+   DomUtils.prepareFieldInfo();
    spectrumViewerWidget = new SpectrumViewer.Widget(spectrumViewerElement);
    curveViewerWidget = new FunctionCurveViewer.Widget(curveViewerElement);
    window.onpopstate = () => restoreAppStateFromUrl_withErrorHandling();

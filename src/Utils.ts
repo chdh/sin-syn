@@ -1,4 +1,5 @@
 const dummyResolvedPromise = Promise.resolve();
+const numberFormat = new Intl.NumberFormat("en-US");
 
 export function nextTick (callback: () => void) {
    void dummyResolvedPromise.then(callback); }
@@ -15,15 +16,18 @@ async function catchErrorAsync (f: Function, ...args: any[]) {
       console.log(error);
       alert("Error: " + error); }}
 
-export function setNumberInputElementValue (element: HTMLInputElement, value?: number) {
-   if (value == undefined) {
-      element.value = ""; }
-    else {
-      element.valueAsNumber = value; }}
+export function formatNumber (n: number | undefined, includeSign: boolean = false) : string {
+   if (n === undefined || !isFinite(n)) {
+      return ""; }
+   const plusSign = (includeSign && n > 0) ? "+" : "";
+   return plusSign + numberFormat.format(n).replace(/,/g, "\u202F"); }
 
-export function getNumberInputElementValue (element: HTMLInputElement) : number | undefined {
-   const v = element.valueAsNumber;
-   return isNaN(v) ? undefined : v; }
+// Returns undefined if the string does not contain a valid number.
+export function decodeNumber (s: string) : number | undefined {
+   if (!s) {
+      return undefined; }
+   const n = Number(s.replace(/[\u{2000}-\u{20FF}]/gu, ""));
+   return isFinite(n) ? n : undefined; }
 
 export function getNumericUrlSearchParam (usp: URLSearchParams, paramName: string, defaultValue?: number) : number | undefined {
    const s = usp.get(paramName);

@@ -2,25 +2,30 @@
    box-sizing: inherit; }
 
 html {
-   font-size: 14px;
+   font-size: 15px;
    box-sizing: border-box; }
 
 body, button, input, select, textarea {
-   font-family: Lato, sans-serif;
+   font-family: "Source Sans Pro", sans-serif;
    font-size: inherit;
-   line-height: 1.4375; }
+   line-height: 1.333334; }
 
 body {
    margin: 20px; }
 
 H1 {
-   font-size: 22px; }
+   font-size: 24px; }
 
 a {
    color: #07C;
    text-decoration: none; }
 a:hover {
    text-decoration: underline; }
+
+.w-inp {
+   width: 60px; }
+.w-lbl {
+   width: 100px; }
 
 div.footer {
    margin-top: 8px;
@@ -32,7 +37,9 @@ code,
 code {
    background-color: #eff0f1; }
 
-input[type="text"], input[type="number"] {
+input[type="text"],
+input[type="number"] {
+   font-family: Consolas, monospace;
    padding: 2px 3px;
    border: 1px solid #aaa; }
 
@@ -41,7 +48,9 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
    -moz-appearance: textfield; }
 
-input[type="text"]:focus, input[type="number"]:focus, select:focus, canvas:focus {
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus, canvas:focus {
    border-color: #7a9cd3 !important;
    outline: 1px solid #a6c8ff;
    outline-offset: 0px; }
@@ -49,27 +58,22 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus, canvas:focus
 .hidden {
    display: none !important; }
 
-label[title] {
-   text-decoration: underline dotted #aaa;
-   text-underline-position: under; }
-
 .parmBlock {
    display: flex;
    align-items: center;
-   margin-bottom: 10px; }
+   margin-bottom: 10px;
+   flex-wrap: wrap;
+   align-items: baseline;
+   column-gap: 25px;
+   row-gap: 8px; }
 
-.parmBlock label {
-   width: 100px; }
-
-.parmBlock input[type="number"] {
-   width: 60px; }
+.parmField {
+   position: relative;
+   display: flex;
+   align-items: baseline; }
 
 #components {
    width: 700px; }
-
-#duration,
-#fadingDuration {
-   margin-right: 25px; }
 
 #fadingDurationLabel,
 #referenceLabel {
@@ -77,6 +81,32 @@ label[title] {
 
 #reference {
    width: 360px; }
+
+.fieldInfoButton {
+   position: absolute;
+   right: -18px;
+   top: -3px;
+   width: 12px;
+   height: 12px;
+   box-sizing: content-box;
+   padding: 4px;
+   z-index: 1;
+   cursor: pointer;
+   background-repeat: no-repeat;
+   background-position: center;
+   background-size: 12px 12px;
+   background-image: url('data:image/svg+xml,<svg version="1.1" viewBox="2 2 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M10 9.25 a.75.75 0 0 1 .75.75 v3.333 a.75.75 0 0 1-1.5 0 V10 a.75.75 0 0 1 .75-.75 M10 5.833 a.959.959 0 1 1-.001 1.917 A.959.959 0 0 1 10 5.833" fill="%2305c"/><path d="m10 2.085a7.915 7.915 0 1 1 0 15.83 7.915 7.915 0 0 1 0-15.83m0 1.33a6.585 6.585 0 1 0 0 13.17 6.585 6.585 0 0 0 0-13.17" clip-rule="evenodd" fill="%2305c" fill-rule="evenodd"/></svg>'); }
+
+.fieldInfoText {
+   position: absolute;
+   top: 30px;
+   left: -13px;
+   min-width: 273px;
+   z-index: 2;
+   border: 1px solid #AAAAAA;
+   border-radius: 10px;
+   background-color: #FFFFDD;
+   padding: 10px 12px; }
 
 div.actionButtons {
    display: flex;
@@ -97,13 +127,14 @@ div.actionButtons button {
    margin-left: 5px; }
 
 #componentsHelpText {
-   background-color: #FEFAE2;
-   border: 1px solid #F3EED5;
-   padding: 5px;
    margin-top: 8px;
    margin-left: 100px;
    margin-bottom: 8px;
-   width: 550px; }
+   width: 600px;
+   border: 1px solid #AAAAAA;
+   border-radius: 10px;
+   background-color: #FFFFDD;
+   padding: 10px 12px; }
 
 /*--- Spectrum and curve viewers ---*/
 

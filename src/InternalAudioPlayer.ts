@@ -1,4 +1,4 @@
-import {nextTick} from "./Utils.js";
+import {nextTick} from "./Utils.ts";
 
 export default class InternalAudioPlayer extends EventTarget {
 

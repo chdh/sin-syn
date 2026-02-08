@@ -1,6 +1,6 @@
 // Sine synthesizer support functions.
 
-import {ComponentParms} from "./SinSynGen";
+import {ComponentParms} from "./SinSynGen.ts";
 
 // Parses a components string.
 // Syntax of the components string:

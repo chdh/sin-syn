@@ -61,9 +61,9 @@ class WidgetContext {
       const maxAmplitude = this.findMaxAmplitude();
       vs2.viewerFunction = this.spectrumCurveFunction;
       vs2.xMin = vState.xMin ?? 0;
-      vs2.xMax = (vState.xMax != undefined) ? vState.xMax : Math.max(1E-99, roundUp10(maxFrequency * 1.02));
-      vs2.yMax = (vState.yMax != undefined) ? vState.yMax : Math.ceil((maxAmplitude) / 10) * 10 + 5;
-      vs2.yMin = (vState.yMin != undefined) ? vState.yMin : vs2.yMax - Math.max(1E-99, this.style.defaultAmplitudeRange);
+      vs2.xMax = vState.xMax ?? Math.max(1E-99, roundUp10(maxFrequency * 1.02));
+      vs2.yMax = vState.yMax ?? Math.ceil((maxAmplitude) / 10) * 10 + 5;
+      vs2.yMin = vState.yMin ?? vs2.yMax - Math.max(1E-99, this.style.defaultAmplitudeRange);
       vs2.gridEnabled = true;
       vs2.xAxisUnit = "Hz";
       vs2.yAxisUnit = "dB";
